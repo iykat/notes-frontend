@@ -8,8 +8,8 @@ interface NoteProps {
 const Note: FC<NoteProps> = ({ title, body }) => {
   return (
     <div className="mb-4 hover:bg-neutral-100 p-2 rounded-lg hover:cursor-pointer">
-      <h2 className="font-semibold">{title}</h2>
-      <p className="opacity-90 text-sm">{body}</p>
+      <h2 className="overflow-ellipsis clamp-text font-semibold">{title}</h2>
+      <p className="opacity-90 text-sm overflow-ellipsis clamp-text">{body}</p>
       <div className="flex text-xs opacity-80 mt-1">
         <p className="mr-auto">Created at: some date</p>
         <p>Updated at: some date</p>
