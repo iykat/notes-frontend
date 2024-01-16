@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Note from "./Note";
 import useSWR from "swr";
-import { RiDeleteBin5Line } from "react-icons/ri";
+import { RiDeleteBin5Line, RiEdit2Line } from "react-icons/ri";
 import axios from "axios";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -12,14 +12,66 @@ export default function Homepage() {
   const noteDialogRef = useRef<HTMLDialogElement | null>(null);
   const deleteNoteDialogRef = useRef<HTMLDialogElement | null>(null);
   const [selectedNoteId, setSelectedNoteId] = useState();
+  const editNoteDialogRef = useRef<HTMLDialogElement | null>(null);
 
   const [newNoteTitle, setNewNoteTitle] = useState<string>("");
   const [newNoteBody, setNewNoteBody] = useState<string>("");
+
+  const [editedNoteId, setEditedNoteId] = useState<string | null>(null);
+  const [editedNoteTitle, setEditedNoteTitle] = useState<string>("");
+  const [editedNoteBody, setEditedNoteBody] = useState<string>("");
 
   const { data, error, isLoading } = useSWR(
     "https://gentle-reef-44011-52614e167e42.herokuapp.com/api/notes",
     fetcher
   );
+
+  const openEditNoteDialog = (id: string) => {
+    const selectedNote = notes.find((note) => note._id === id);
+
+    if (selectedNote) {
+      setEditedNoteId(id);
+      setEditedNoteTitle(selectedNote.title);
+      setEditedNoteBody(selectedNote.noteBody);
+
+      if (editNoteDialogRef.current) {
+        editNoteDialogRef.current.showModal();
+      }
+    }
+  };
+
+  const closeEditNoteDialog = () => {
+    if (editNoteDialogRef.current) {
+      editNoteDialogRef.current.close();
+    }
+  };
+
+  const handleEditNote = async () => {
+    try {
+      // Make an API call to update the edited note
+      await axios.patch(
+        `https://gentle-reef-44011-52614e167e42.herokuapp.com/api/notes/${editedNoteId}`,
+        {
+          title: editedNoteTitle,
+          noteBody: editedNoteBody,
+        }
+      );
+
+      // Update the local state to reflect the edited note
+      setNotes((prevNotes) =>
+        prevNotes.map((note) =>
+          note._id === editedNoteId
+            ? { ...note, title: editedNoteTitle, noteBody: editedNoteBody }
+            : note
+        )
+      );
+
+      // Close the edit note dialog
+      closeEditNoteDialog();
+    } catch (error) {
+      console.error("Error editing note:", error);
+    }
+  };
 
   useEffect(() => {
     if (isLoading) return; // Do nothing while loading
@@ -140,13 +192,17 @@ export default function Homepage() {
             <ul>
               {notes.map((note, index) => (
                 <li key={index} className="flex items-center">
-                  <div className="mr-auto flex-1">
+                  <div className="mr-auto flex-1" onClick={() => openEditNoteDialog(note._id)}>
                     <Note
                       title={note.title}
                       noteBody={note.noteBody}
                       createdAt={new Date(note.createdAt)}
                       updatedAt={new Date(note.updatedAt)}
                     />
+                    {/* <RiEdit2Line
+                      onClick={}
+                      className="text-2xl ml-4 opacity-70 hover:opacity-100 hover:cursor-pointer text-blue-500"
+                    /> */}
                   </div>
 
                   <RiDeleteBin5Line
@@ -213,6 +269,40 @@ export default function Homepage() {
           >
             Yes, Delete Note
           </button>
+        </div>
+      </dialog>
+
+      <dialog
+        ref={editNoteDialogRef}
+        className="bg-white p-8 rounded-xl w-1/2 mx-auto shadow-sm"
+      >
+        <div className="bg-red-100">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleEditNote();
+            }}
+          >
+            <div className="w-full">
+              <input
+                type="text"
+                className="w-full"
+                placeholder="Note title"
+                value={editedNoteTitle}
+                onChange={(e) => setEditedNoteTitle(e.target.value)}
+              />
+            </div>
+            <div className="min-h-[18em]">
+              <input
+                type="text"
+                placeholder="Note body"
+                className="h-full w-full"
+                value={editedNoteBody}
+                onChange={(e) => setEditedNoteBody(e.target.value)}
+              />
+            </div>
+            <button type="submit">Save</button>
+          </form>
         </div>
       </dialog>
     </main>
