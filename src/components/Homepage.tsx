@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import Note from "./Note";
+import Note, { NoteInterface } from "./Note";
 import useSWR from "swr";
 import { RiDeleteBin5Line, RiEdit2Line } from "react-icons/ri";
 import axios from "axios";
@@ -158,20 +158,17 @@ export default function Homepage() {
         }
       );
 
-      // Refetch the notes to update the list
       const newData = await fetcher(
         "https://gentle-reef-44011-52614e167e42.herokuapp.com/api/notes"
       );
       setNotes(newData.notes);
 
-      // Close the note dialog
       closeNoteDialog();
     } catch (error) {
       console.error("Error creating note:", error);
     }
   };
 
-  // handleOutsideClick()
 
   return (
     <main className="">
@@ -192,17 +189,18 @@ export default function Homepage() {
             <ul>
               {notes.map((note, index) => (
                 <li key={index} className="flex items-center">
-                  <div className="mr-auto flex-1" onClick={() => openEditNoteDialog(note._id)}>
+                  <div
+                    className="mr-auto flex-1"
+                    onClick={() => openEditNoteDialog(note._id)}
+                  >
                     <Note
                       title={note.title}
                       noteBody={note.noteBody}
                       createdAt={new Date(note.createdAt)}
                       updatedAt={new Date(note.updatedAt)}
+                      _id={null}
                     />
-                    {/* <RiEdit2Line
-                      onClick={}
-                      className="text-2xl ml-4 opacity-70 hover:opacity-100 hover:cursor-pointer text-blue-500"
-                    /> */}
+
                   </div>
 
                   <RiDeleteBin5Line

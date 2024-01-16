@@ -1,7 +1,7 @@
 import { formatDate } from "@/utils/helpers";
 import { FC } from "react";
 export interface NoteInterface {
-  id?: string;
+  _id: string | null;
   title: string;
   noteBody: string;
   createdAt: Date,
