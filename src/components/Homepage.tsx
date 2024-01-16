@@ -26,8 +26,9 @@ export default function Homepage() {
     fetcher
   );
 
-  const openEditNoteDialog = (id: string) => {
-    const selectedNote = notes.find((note) => note._id === id);
+  const openEditNoteDialog = (id: string | null) => {
+    if (id) {
+      const selectedNote = notes.find((note) => note._id === id);
 
     if (selectedNote) {
       setEditedNoteId(id);
@@ -38,6 +39,8 @@ export default function Homepage() {
         editNoteDialogRef.current.showModal();
       }
     }
+    }
+    
   };
 
   const closeEditNoteDialog = () => {
